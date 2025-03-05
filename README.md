@@ -3,7 +3,8 @@
 A simple MIPS processor emulator written in Haskell.
 
 Supports registers, memory operations, instruction decoding, and execution.
-Planning to add support for binary file loading.
+
+Support for binary file loading coming at a later update.
 
 ## Development
 
