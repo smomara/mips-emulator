@@ -56,10 +56,13 @@ data SpecialRegisters = SpecialRegisters
 
 type Memory = Map Address Word8
 
+data ExecutionStatus = Running | Exited Int deriving (Show, Eq)
+
 data MipsState = MipsState
   { memory :: Memory
   , registers :: RegisterFile
   , specialRegisters :: SpecialRegisters
+  , status :: ExecutionStatus
   }
   deriving (Show, Eq)
 
@@ -111,6 +114,7 @@ initialState =
     { memory = M.empty
     , registers = initialRegisters
     , specialRegisters = SpecialRegisters 0 0 0
+    , status = Running
     }
 
 runVM :: VM a -> MipsState -> Either String (a, MipsState)

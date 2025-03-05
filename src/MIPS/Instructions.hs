@@ -1,5 +1,6 @@
 module MIPS.Instructions where
 
+import Control.Monad.State (get, put)
 import Data.Bits (shiftL, shiftR, (.&.), (.|.))
 import Data.Int (Int16, Int32, Int64)
 import Data.Word (Word16, Word32)
@@ -155,4 +156,11 @@ executeInstruction instr = case instr of
     currPC <- getPC
     writeRegister RA $ currPC + 4
     setPC $ target * 4
-  Syscall -> throwError "System calls not yet implemented" -- TODO
+  Syscall -> do
+    syscallNum <- readRegister V0
+    case syscallNum of
+      10 -> do
+        exitCode <- readRegister A0
+        st <- get
+        put $ st{status = Exited (fromIntegral exitCode)}
+      _ -> throwError $ "Unsupported syscall: " ++ show syscallNum
