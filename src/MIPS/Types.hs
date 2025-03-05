@@ -1,11 +1,12 @@
 module MIPS.Types where
 
 import Control.Monad.State
+import Data.Int (Int16)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import Data.Vector (Vector)
 import qualified Data.Vector as V
-import Data.Word (Word32, Word8)
+import Data.Word (Word16, Word32, Word8)
 
 type Address = Word32
 
@@ -63,6 +64,40 @@ data MipsState = MipsState
   deriving (Show, Eq)
 
 type VM a = StateT MipsState (Either String) a
+
+data Instruction
+  = -- R-type instructions
+    Add Register Register Register -- add $d,$s,$t
+  | Addu Register Register Register -- addu $d,$s,$t
+  | Sub Register Register Register -- sub $d,$s,$t
+  | Subu Register Register Register -- subu $d,$s,$t
+  | And Register Register Register -- and $d,$s,$t
+  | Or Register Register Register -- or $d,$s,$t
+  | Slt Register Register Register -- slt $d,$s,$t
+  | Mult Register Register -- mult $s,$t
+  | Div Register Register -- div $s,$t
+  | Sll Register Register Int -- sll $d,$t,shamt
+  | Srl Register Register Int -- srl $d,$t,shamt
+  | Jr Register -- jr $s
+  | Mfhi Register -- mfhi $d
+  | Mflo Register -- mflo $d
+  -- I-type instructions (Immediate)
+  | Addi Register Register Int16 -- addi $t,$s,imm
+  | Addiu Register Register Int16 -- addiu $t,$s,imm
+  | Andi Register Register Word16 -- andi $t,$s,imm
+  | Ori Register Register Word16 -- ori $t,$s,imm
+  | Slti Register Register Int16 -- slti $t,$s,imm
+  | Lui Register Word16 -- lui $t,imm
+  | Lw Register Int16 Register -- lw $t,offset($s)
+  | Sw Register Int16 Register -- sw $t,offset($s)
+  | Beq Register Register Int16 -- beq $s,$t,offset
+  | Bne Register Register Int16 -- bne $s,$t,offset
+  -- J-type instructions (Jump)
+  | J Address -- j target
+  | Jal Address -- jal target
+  -- System calls
+  | Syscall -- syscall
+  deriving (Show, Eq)
 
 throwError :: String -> VM a
 throwError = lift . Left

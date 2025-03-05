@@ -16,10 +16,14 @@ library
     other-modules:    MIPS.Types
                     , MIPS.Memory
                     , MIPS.Registers
+                    , MIPS.Instructions
+                    , MIPS.Decoder
     -- other-extensions:
     build-depends:    base ^>=4.18.2.1
                     , containers
                     , vector
                     , mtl
+                    , binary
+                    , bytestring
     hs-source-dirs:   src
     default-language: Haskell2010
