@@ -1,5 +1,6 @@
 module MIPS.Types where
 
+import Control.Monad.Except
 import Control.Monad.State
 import Data.Int (Int16)
 import Data.Map.Strict (Map)
@@ -69,7 +70,7 @@ data MipsState = MipsState
 getRegister :: Register -> MipsState -> Word32
 getRegister reg s = registers s V.! fromEnum reg
 
-type VM a = StateT MipsState (Either String) a
+type VM a = ExceptT String (StateT MipsState IO) a
 
 data Instruction
   = -- R-type instructions
@@ -105,9 +106,6 @@ data Instruction
   | Syscall -- syscall
   deriving (Show, Eq)
 
-throwError :: String -> VM a
-throwError = lift . Left
-
 initialRegisters :: RegisterFile
 initialRegisters = V.replicate 32 0
 
@@ -120,5 +118,5 @@ initialState =
     , status = Running
     }
 
-runVM :: VM a -> MipsState -> Either String (a, MipsState)
-runVM = runStateT
+runVM :: VM a -> MipsState -> IO (Either String a, MipsState)
+runVM vm = runStateT (runExceptT vm)

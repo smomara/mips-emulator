@@ -22,13 +22,13 @@ cabal build
 ```haskell
 import Data.Binary.Put
 import Data.ByteString.Lazy (ByteString)
-import qualified Data.Vector as V
 import MIPS
 
 -- 1. Load 42 into $t0
 -- 2. Load 58 into $t1
 -- 3. Add $t0 and $t1, storing result in $t2
--- 4. Exit the program
+-- 4. Print the result of the addition (stored in $t2) by loading it into $a0
+-- 5. Exit the program
 exampleProgram :: ByteString
 exampleProgram = runPut $ do
   -- li $t0, 42 (using lui and ori)
@@ -42,18 +42,32 @@ exampleProgram = runPut $ do
   -- add $t2, $t0, $t1
   putWord32be 0x01095020 -- add $t2, $t0, $t1
 
-  -- Exit syscall
-  putWord32be 0x34020000 -- li $v0, 0 (set exit code to 0)
-  putWord32be 0x3402000a -- li $v0, 10 (syscall number 10 is exit)
+  -- Load the result of the addition ($t2) into $a0 for printing
+  putWord32be 0x01402020 -- add $a0, $t2, $zero
+
+  -- Load the syscall number 1 (print_int) into $v0
+  putWord32be 0x3c020000 -- lui $v0, 0
+  putWord32be 0x34420001 -- ori $v0, $v0, 1
+
+  -- Perform the syscall to print the integer
+  putWord32be 0x0000000c -- syscall
+
+  -- Load the syscall number 10 (exit) into $v0
+  putWord32be 0x3c020000 -- lui $v0, 0
+  putWord32be 0x3442000a -- ori $v0, $v0, 10
+
+  -- Perform the syscall to exit
   putWord32be 0x0000000c -- syscall
 
 main :: IO ()
-main = case executeProgram exampleProgram of
-  Left err -> putStrLn $ "Error: " ++ err
-  Right finalState -> do
-    -- Check if the calculation was correct (42 + 58 = 100)
-    let t2Value = getRegister T2 finalState
-    if t2Value == 100
-      then putStrLn "Program executed successfully! Result is 100."
-      else putStrLn $ "Program executed but result is incorrect: " ++ show t2Value
+main = do
+  result <- executeProgram exampleProgram
+  case result of
+    Left err -> putStrLn $ "Error: " ++ err
+    Right finalState -> do
+      -- Check if the calculation was correct (42 + 58 = 100)
+      let t2Value = getRegister T2 finalState
+      if t2Value == 100
+        then putStrLn "Program executed successfully! Result is 100."
+        else putStrLn $ "Program executed but result is incorrect: " ++ show t2Value
 ```

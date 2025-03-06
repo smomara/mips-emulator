@@ -1,5 +1,6 @@
 module MIPS.Decoder where
 
+import Control.Monad.Except (throwError)
 import Data.Binary.Get
 import Data.Bits (shiftR, (.&.))
 import Data.ByteString.Lazy (ByteString)

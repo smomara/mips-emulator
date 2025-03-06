@@ -37,16 +37,22 @@ run = do
     Running -> step >> run
     Exited _ -> return ()
 
-loadProgram :: ByteString -> Either String MipsState
-loadProgram program = snd <$> runVM (loadExecutable program) initialState
+loadProgram :: ByteString -> IO (Either String MipsState)
+loadProgram program = do
+  (result, state) <- runVM (loadExecutable program) initialState
+  return $ case result of
+    Left str -> Left str
+    Right _ -> Right state
 
 loadProgramFromFile :: FilePath -> IO (Either String MipsState)
-loadProgramFromFile path = loadProgram <$> BL.readFile path
+loadProgramFromFile path = BL.readFile path >>= loadProgram
 
-executeProgram :: ByteString -> Either String MipsState
+executeProgram :: ByteString -> IO (Either String MipsState)
 executeProgram program = do
-  state <- loadProgram program
-  snd <$> runVM run state
+  (result, state) <- runVM (loadExecutable program >> run) initialState
+  return $ case result of
+    Left str -> Left str
+    Right _ -> Right state
 
 executeProgramFromFile :: FilePath -> IO (Either String MipsState)
-executeProgramFromFile path = executeProgram <$> BL.readFile path
+executeProgramFromFile path = BL.readFile path >>= executeProgram

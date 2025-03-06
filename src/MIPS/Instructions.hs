@@ -1,5 +1,7 @@
 module MIPS.Instructions where
 
+import Control.Monad.Except (throwError)
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.State (get, put)
 import Data.Bits (shiftL, shiftR, (.&.), (.|.))
 import Data.Int (Int16, Int32, Int64)
@@ -159,6 +161,12 @@ executeInstruction instr = case instr of
   Syscall -> do
     syscallNum <- readRegister V0
     case syscallNum of
+      -- print_int
+      1 -> do
+        int <- readRegister A0
+        liftIO $ print int
+        incrementPC
+      -- exit
       10 -> do
         exitCode <- readRegister A0
         st <- get

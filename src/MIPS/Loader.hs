@@ -39,4 +39,4 @@ loadProgramBytes addr bs
 loadExecutableFromFile :: FilePath -> IO (Either String Address)
 loadExecutableFromFile path = do
   contents <- BL.readFile path
-  return $ fst <$> runVM (loadExecutable contents) initialState
+  fst <$> runVM (loadExecutable contents) initialState

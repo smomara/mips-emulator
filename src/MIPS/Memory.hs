@@ -1,6 +1,7 @@
 module MIPS.Memory where
 
 import Control.Monad (when)
+import Control.Monad.Except (throwError)
 import Control.Monad.State
 import Data.Bits
 import qualified Data.Map.Strict as M
