@@ -9,6 +9,8 @@ import Data.Word (Word16, Word32)
 import MIPS.Memory (readWord, writeWord)
 import MIPS.Registers
 import MIPS.Types
+import System.IO (hFlush, stdout)
+import Text.Printf (printf)
 
 signExtend16 :: Int16 -> Int32
 signExtend16 = fromIntegral
@@ -164,10 +166,15 @@ executeInstruction instr = case instr of
       -- print_int
       1 -> do
         int <- readRegister A0
-        liftIO $ print int
+        liftIO $ printf "%d" int
+        liftIO $ hFlush stdout
         incrementPC
       -- exit
       10 -> do
+        exitCode <- readRegister A0
+        st <- get
+        put $ st{status = Exited (fromIntegral exitCode)}
+      17 -> do
         exitCode <- readRegister A0
         st <- get
         put $ st{status = Exited (fromIntegral exitCode)}
