@@ -3,7 +3,7 @@
 A simple MIPS processor emulator written in Haskell.
 
 Supports MIPS instructions, register and memory operations,
-binary program loading, and exit syscall (10).
+binary program loading, exit syscalls (10 and 17), and print_int syscall (1).
 
 Planning to add support for additional syscalls.
 
@@ -17,7 +17,7 @@ nix develop
 cabal build
 ```
 
-## Usage
+## Example
 
 ```haskell
 import Data.Binary.Put
