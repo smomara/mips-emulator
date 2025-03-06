@@ -66,6 +66,9 @@ data MipsState = MipsState
   }
   deriving (Show, Eq)
 
+getRegister :: Register -> MipsState -> Word32
+getRegister reg s = registers s V.! fromEnum reg
+
 type VM a = StateT MipsState (Either String) a
 
 data Instruction
