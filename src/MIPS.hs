@@ -18,10 +18,10 @@ import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BL
 import MIPS.Decoder (decodeInstruction)
 import MIPS.Instructions (executeInstruction)
-import MIPS.Loader (loadExecutable)
+import MIPS.Loader (loadProgram)
 import MIPS.Memory (readWord)
 import MIPS.Registers (getPC)
-import MIPS.Types (ExecutionStatus (..), MipsState (status), Register (..), VM, getRegister, initialState, runVM)
+import MIPS.Types (Address, ExecutionStatus (..), MipsState (status), Register (..), VM, getRegister, initialState, runVM)
 
 step :: VM ()
 step = do
@@ -37,19 +37,12 @@ run = do
     Running -> step >> run
     Exited _ -> return ()
 
-loadProgram :: ByteString -> IO (Either String MipsState)
-loadProgram program = do
-  (result, state) <- runVM (loadExecutable program) initialState
-  return $ case result of
-    Left str -> Left str
-    Right _ -> Right state
-
-loadProgramFromFile :: FilePath -> IO (Either String MipsState)
-loadProgramFromFile path = BL.readFile path >>= loadProgram
+loadProgramFromFile :: FilePath -> IO (VM Address)
+loadProgramFromFile path = loadProgram <$> BL.readFile path
 
 executeProgram :: ByteString -> IO (Either String MipsState)
 executeProgram program = do
-  (result, state) <- runVM (loadExecutable program >> run) initialState
+  (result, state) <- runVM (loadProgram program >> run) initialState
   return $ case result of
     Left str -> Left str
     Right _ -> Right state

@@ -14,8 +14,8 @@ defaultEntryPoint = 0x00400000
 defaultStackPointer :: Word32
 defaultStackPointer = 0x7FFFFFFC
 
-loadExecutable :: ByteString -> VM Address
-loadExecutable bs = do
+loadProgram :: ByteString -> VM Address
+loadProgram bs = do
   setPC defaultEntryPoint
   writeRegister SP defaultStackPointer
   loadProgramBytes defaultEntryPoint bs
@@ -35,8 +35,3 @@ loadProgramBytes addr bs
             (\(i, b) -> writeByte (addr + fromIntegral i :: Word32) b)
             (zip [0 :: Word32 ..] (BL.unpack chunk)) -- TODO overflow?
           return $ addr + fromIntegral (BL.length chunk)
-
-loadExecutableFromFile :: FilePath -> IO (Either String Address)
-loadExecutableFromFile path = do
-  contents <- BL.readFile path
-  fst <$> runVM (loadExecutable contents) initialState
